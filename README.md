@@ -31,7 +31,7 @@
 [styles.css](https://minhaskamal.github.io/DownGit/#/home?url=https://github.com/goitacademy/react-homework/blob/master/homework-03/image-finder/styles.css)
 і підправити під себе, якщо потрібно.
 
-![image](https://github.com/savchyndd/goit-react-hw-03-image-finder/assets/96209694/6f37c117-def3-40df-953c-2a2084cee55a)
+![image](./assets/image-finder.jpg)
 
 #### Інструкція Pixabay API
 

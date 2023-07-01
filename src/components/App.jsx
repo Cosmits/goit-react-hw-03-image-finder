@@ -1,89 +1,113 @@
 import { Component } from 'react';
-import { nanoid } from 'nanoid';
 
-import Section from "./Section";
-import ContactForm from './ContactForm';
-import FilterInput from './FilterInput/FilterInput';
-import ContactsList from './ContactsList/ContactsList';
-import { loadLocalStorage, saveLocalStorage } from 'utils/localStorage';
+import SearchBar from './SearchBar';
+import ImageGallery from './ImageGallery';
+import Loader from './Loader';
+import Button from './Button/Button';
+import { getImages, perPage } from 'services/get_images';
+import ErrorTitle from './ErrorTitle';
 
 export default class App extends Component {
 
   state = {
-    contacts: [
-      { id: 'id-1', name: 'Rosie Simpson', number: '459-12-56' },
-      { id: 'id-2', name: 'Hermione Kline', number: '443-89-12' },
-      { id: 'id-3', name: 'Eden Clements', number: '645-17-79' },
-      { id: 'id-4', name: 'Annie Copeland', number: '227-91-26' },
-    ],
-    filter: '',
+    searchValue: '',
+    images: [],
+
+    isLoading: false,
+
+    currentPage: 1,
+    totalPages: 0,
+
+    error: null,
     hasError: false,
   };
 
-  addContact = data => {
-    const { contacts } = this.state;
-    const newContact = { ...data, id: nanoid(), };
 
-    contacts.some(({ name }) => name === data.name)
-      ? alert(`${data.name} is duplicate contact`)
-      : this.setState(prevState => ({
-        contacts: [...prevState.contacts, newContact],
-      }));
+  handleSubmit = query => {
+    this.setState({
+      searchValue: query,
+      images: [],
+      currentPage: 1,
+    });
   };
 
-  delContact = userId => {
+  addCurrentPage = () => {
     this.setState(prevState => ({
-      contacts: prevState.contacts.filter(contact => contact.id !== userId),
-    }));
-  };
+      currentPage: prevState.currentPage + 1,
+    }))
+  }
 
-  handleChangeFilter = ({ currentTarget: { value } }) => {
-    this.setState({ filter: value });
-  };
+  normalizedData = data => {
+    return data.map(({ id, tags, webformatURL, largeImageURL }) => {
+      return { id, tags, webformatURL, largeImageURL };
+    });
+  }
 
-  getFilterContacts = () => {
-    const { filter, contacts } = this.state;
-    return contacts.filter(({ name }) =>
-      name.toLowerCase().includes(filter.toLowerCase())
-    );
+  getImagesFromAPI = async () => {
+    try {
+      this.setState({ isLoading: true });
+
+
+      const { searchValue, currentPage } = this.state;
+      const data = await getImages(searchValue, currentPage);
+
+
+      // if (!data.data.hits.length ) {
+      //   // // Если изображения не найдены, выводим сообщение
+      //   // return toast.info('Sorry image not found...', {
+      //   //   position: toast.POSITION.TOP_RIGHT,
+      //   // });
+      // }
+
+      const newData = this.normalizedData(data.data.hits);
+
+      this.setState(prevState => ({
+        images: [...prevState.images, ...newData],
+        isLoading: false,
+        totalPages: Math.trunc(data.totalHits / perPage),
+        error: null,
+      }));
+    } catch (error) {
+      this.setState({ hasError: true, error: error });
+    } finally {
+      this.setState({ isLoading: false });
+    }
   };
 
   //================================================================
-  componentDidMount() {
-    const contacts = loadLocalStorage();
-    if (contacts) this.setState({ contacts });
-  }
+  // componentDidMount() {
+  // const contacts = loadLocalStorage();
+  // if (contacts) this.setState({ contacts });
+  // }
 
   componentDidUpdate(prevProps, prevState) {
-    if (prevState.contacts.length !== this.state.contacts.length) {
-      saveLocalStorage(this.state.contacts)
+    if (this.state.searchValue &&
+      (prevState.searchValue !== this.state.searchValue ||
+        prevState.currentPage !== this.state.currentPage)
+    ) {
+      this.getImagesFromAPI();
     }
   }
+
 
   componentDidCatch(error, info) {
     // Якщо метод був викликаний, отже, є помилка!
     // Встановлюємо стан
-    this.setState({ hasError: true });
+    this.setState({ hasError: true, error: error });
     // Також можна надіслати звіт про помилку вашому аналітичному сервісу
     // logErrorToMyService(error, info);
   }
 
   //================================================================
   render() {
-    if (this.state.hasError) {
-      // Рендеримо fallback UI
-      return <h1>Something went wrong, ERROR</h1>;
-    }
-
+    const { images, searchValue, isLoading, error, hasError } = this.state;
     return (
       <>
-        <Section title="Phonebook">
-          <ContactForm addContact={this.addContact} />
-        </Section>
-        <Section title="Contacts">
-          <FilterInput value={this.state.filter} onChangeFilter={this.handleChangeFilter} />
-          <ContactsList contacts={this.getFilterContacts()} delContact={this.delContact} />
-        </Section>
+        <SearchBar onSubmit={this.handleSubmit} />
+        {images.length > 0 && <ImageGallery images={images} searchValue={searchValue} />}
+        {isLoading && <Loader />}
+        {images.length > 0 && <Button onClick={this.addCurrentPage} />}
+        {hasError && <ErrorTitle error={error} />}
       </>)
   }
 }
