@@ -74,9 +74,7 @@ export default class App extends Component {
 
       //The End
       let theEnd = false;
-      if (data.data.hits.length && data.data.hits.length < currentPage * perPage) {
-        theEnd = true;
-      }
+      if (!data.data.hits.length || data.data.hits.length < 12) theEnd = true;
 
       const newData = this.normalizedData(data.data.hits);
 
@@ -123,9 +121,8 @@ export default class App extends Component {
           searchValue={searchValue}
           totalHits={totalHits} />}
         {isLoading && <Loader />}
-        {!theEnd && images.length && <Button onClick={this.addCurrentPage} />}
-        {theEnd && images.length && <TitleH1 searchValue={"The END"} totalHits={totalHits}></TitleH1>}
-
+        {!theEnd && images.length > 0 && <Button onClick={this.addCurrentPage} />}
+        {theEnd && images.length > 0 && <TitleH1 searchValue={"The END"} totalHits={totalHits} />}
         {hasError && <ErrorTitle error={error} />}
         <ToastContainer />
       </>)
