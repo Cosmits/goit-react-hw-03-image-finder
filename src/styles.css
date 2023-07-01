@@ -42,6 +42,7 @@ img {
 .SearchBar {
   top: 0;
   left: 0;
+  -webkit-position: sticky;
   position: sticky;
   z-index: 1100;
   display: flex;
@@ -77,6 +78,7 @@ img {
   height: 48px;
   border: 0;
   /* background-image: url("./icons/search.svg"); */
+  background-color: gray;
   background-size: 40%;
   background-repeat: no-repeat;
   background-position: center;
@@ -103,6 +105,7 @@ img {
 }
 
 .SearchForm-input {
+  margin-left: 8px;
   display: inline-block;
   width: 100%;
   font: inherit;
@@ -206,11 +209,17 @@ img {
   background-color: #303f9f;
 }
 
+/* my style */
+
 .Container {
   /* display: block;
   margin: 0 auto; */
   text-align: center;
   margin-top: 24px;
   margin-bottom: 24px;
+}
 
+.TitleH1 {
+  margin-bottom: 24px;
+  text-transform: capitalize;
 }

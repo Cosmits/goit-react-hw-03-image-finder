@@ -1,6 +1,5 @@
 import PropTypes from 'prop-types';
 
-
 const Button = ({ onClick }) => {
   return (
     <div className="Container">

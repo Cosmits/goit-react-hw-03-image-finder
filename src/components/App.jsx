@@ -1,22 +1,27 @@
 import { Component } from 'react';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 import SearchBar from './SearchBar';
 import ImageGallery from './ImageGallery';
 import Loader from './Loader';
 import Button from './Button/Button';
-import { getImages, perPage } from 'services/get_images';
 import ErrorTitle from './ErrorTitle';
+import TitleH1 from './TitleH1';
 
+import { getImages, perPage } from 'services/get_images';
 export default class App extends Component {
 
   state = {
     searchValue: '',
     images: [],
+    totalHits: 0,
 
     isLoading: false,
 
     currentPage: 1,
     totalPages: 0,
+    theEnd: false,
 
     error: null,
     hasError: false,
@@ -28,6 +33,7 @@ export default class App extends Component {
       searchValue: query,
       images: [],
       currentPage: 1,
+      totalHits: 0,
     });
   };
 
@@ -38,8 +44,8 @@ export default class App extends Component {
   }
 
   normalizedData = data => {
-    return data.map(({ id, tags, webformatURL, largeImageURL }) => {
-      return { id, tags, webformatURL, largeImageURL };
+    return data.map(({ id, tags, webformatURL, largeImageURL, userImageURL }) => {
+      return { id, tags, webformatURL, largeImageURL, userImageURL };
     });
   }
 
@@ -47,22 +53,37 @@ export default class App extends Component {
     try {
       this.setState({ isLoading: true });
 
-
       const { searchValue, currentPage } = this.state;
       const data = await getImages(searchValue, currentPage);
 
+      // All right
+      if (data.data.hits.length && currentPage === 1) {
+        toast.success(<span>Fined {data.data.totalHits} img for value = {searchValue}</span>, {
+          position: toast.POSITION.TOP_LEFT,
+          theme: "colored",
+        });
+      }
 
-      // if (!data.data.hits.length ) {
-      //   // // Если изображения не найдены, выводим сообщение
-      //   // return toast.info('Sorry image not found...', {
-      //   //   position: toast.POSITION.TOP_RIGHT,
-      //   // });
-      // }
+      // not found
+      if (!data.data.hits.length) {
+        return toast.warning(`Sorry image('s) not found...`, {
+          position: toast.POSITION.TOP_LEFT,
+          theme: "colored",
+        });
+      }
+
+      //The End
+      let theEnd = false;
+      if (data.data.hits.length && data.data.hits.length < currentPage * perPage) {
+        theEnd = true;
+      }
 
       const newData = this.normalizedData(data.data.hits);
 
       this.setState(prevState => ({
         images: [...prevState.images, ...newData],
+        totalHits: data.data.totalHits,
+        theEnd: theEnd,
         isLoading: false,
         totalPages: Math.trunc(data.totalHits / perPage),
         error: null,
@@ -74,12 +95,6 @@ export default class App extends Component {
     }
   };
 
-  //================================================================
-  // componentDidMount() {
-  // const contacts = loadLocalStorage();
-  // if (contacts) this.setState({ contacts });
-  // }
-
   componentDidUpdate(prevProps, prevState) {
     if (this.state.searchValue &&
       (prevState.searchValue !== this.state.searchValue ||
@@ -88,7 +103,6 @@ export default class App extends Component {
       this.getImagesFromAPI();
     }
   }
-
 
   componentDidCatch(error, info) {
     // Якщо метод був викликаний, отже, є помилка!
@@ -100,14 +114,20 @@ export default class App extends Component {
 
   //================================================================
   render() {
-    const { images, searchValue, isLoading, error, hasError } = this.state;
+    const { images, totalHits, searchValue, theEnd, isLoading, error, hasError } = this.state;
     return (
       <>
         <SearchBar onSubmit={this.handleSubmit} />
-        {images.length > 0 && <ImageGallery images={images} searchValue={searchValue} />}
+        {images.length > 0 && <ImageGallery
+          images={images}
+          searchValue={searchValue}
+          totalHits={totalHits} />}
         {isLoading && <Loader />}
-        {images.length > 0 && <Button onClick={this.addCurrentPage} />}
+        {!theEnd && images.length && <Button onClick={this.addCurrentPage} />}
+        {theEnd && images.length && <TitleH1 searchValue={"The END"} totalHits={totalHits}></TitleH1>}
+
         {hasError && <ErrorTitle error={error} />}
+        <ToastContainer />
       </>)
   }
 }

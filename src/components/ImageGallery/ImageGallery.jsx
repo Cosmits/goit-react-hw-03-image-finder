@@ -1,17 +1,21 @@
 import PropTypes from 'prop-types';
 
 import ImageGalleryItem from 'components/ImageGalleryItem';
+import TitleH1 from 'components/TitleH1';
 
 
-const ImageGallery = ({ images }) => {
+const ImageGallery = ({ images, searchValue, totalHits }) => {
   return (
-    <div className="Container">
-      <ul className='ImageGallery'>
-        {images.map(image => (
-          <ImageGalleryItem key={image.id} image={image} />
-        ))}
-      </ul>
-    </div>
+    <>
+      <TitleH1 searchValue={searchValue} totalHits={totalHits}></TitleH1>
+      <div className="Container">
+        <ul className='ImageGallery'>
+          {images.map(image => (
+            <ImageGalleryItem key={image.id} image={image} />
+          ))}
+        </ul>
+      </div>
+    </>
   );
 };
 
@@ -22,6 +26,7 @@ ImageGallery.propTypes = {
     })
   ).isRequired,
   searchValue: PropTypes.string.isRequired,
+  totalHits: PropTypes.number,
 };
 
 export default ImageGallery;

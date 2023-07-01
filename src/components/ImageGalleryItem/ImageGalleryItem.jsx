@@ -27,7 +27,7 @@ export default class ImageGalleryItem extends Component {
           <Modal
             tags={tags}
             largeImageURL={largeImageURL}
-            onClose={this.toggleModal}
+            onCloseModal={this.toggleModal}
           />
         )}
       </li>
@@ -39,6 +39,7 @@ ImageGalleryItem.propTypes = {
   image: PropTypes.shape({
     tags: PropTypes.string.isRequired,
     webformatURL: PropTypes.string.isRequired,
+    userImageURL: PropTypes.string.isRequired,
     largeImageURL: PropTypes.string.isRequired,
   }).isRequired,
 };
