@@ -29,12 +29,14 @@ export default class App extends Component {
 
 
   handleSubmit = query => {
-    this.setState({
-      searchValue: query,
-      images: [],
-      currentPage: 1,
-      totalHits: 0,
-    });
+    if (this.state.searchValue !== query) {
+      this.setState({
+        searchValue: query,
+        images: [],
+        currentPage: 1,
+        totalHits: 0,
+      });
+    }
   };
 
   addCurrentPage = () => {
@@ -100,14 +102,6 @@ export default class App extends Component {
     ) {
       this.getImagesFromAPI();
     }
-  }
-
-  componentDidCatch(error, info) {
-    // Якщо метод був викликаний, отже, є помилка!
-    // Встановлюємо стан
-    this.setState({ hasError: true, error: error });
-    // Також можна надіслати звіт про помилку вашому аналітичному сервісу
-    // logErrorToMyService(error, info);
   }
 
   //================================================================
