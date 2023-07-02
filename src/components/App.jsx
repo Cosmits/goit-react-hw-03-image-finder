@@ -58,7 +58,7 @@ export default class App extends Component {
       const { searchValue, currentPage } = this.state;
       const data = await getImages(searchValue, currentPage);
 
-      // All right
+      // All right 
       if (data.data.hits.length && currentPage === 1) {
         toast.success(<span>Fined {data.data.totalHits} img for value = {searchValue}</span>, {
           position: toast.POSITION.TOP_LEFT,
