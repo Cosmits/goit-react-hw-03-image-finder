@@ -29,12 +29,14 @@ export default class App extends Component {
 
 
   handleSubmit = query => {
-    this.setState({
-      searchValue: query,
-      images: [],
-      currentPage: 1,
-      totalHits: 0,
-    });
+    if (this.state.searchValue !== query) {
+      this.setState({
+        searchValue: query,
+        images: [],
+        currentPage: 1,
+        totalHits: 0,
+      });
+    }
   };
 
   addCurrentPage = () => {
@@ -56,7 +58,7 @@ export default class App extends Component {
       const { searchValue, currentPage } = this.state;
       const data = await getImages(searchValue, currentPage);
 
-      // All right
+      // All right 
       if (data.data.hits.length && currentPage === 1) {
         toast.success(<span>Fined {data.data.totalHits} img for value = {searchValue}</span>, {
           position: toast.POSITION.TOP_LEFT,
@@ -100,14 +102,6 @@ export default class App extends Component {
     ) {
       this.getImagesFromAPI();
     }
-  }
-
-  componentDidCatch(error, info) {
-    // Якщо метод був викликаний, отже, є помилка!
-    // Встановлюємо стан
-    this.setState({ hasError: true, error: error });
-    // Також можна надіслати звіт про помилку вашому аналітичному сервісу
-    // logErrorToMyService(error, info);
   }
 
   //================================================================
